@@ -110,6 +110,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const sugarGrams = document.getElementById('sugarGrams');
   const sugarPercent = document.getElementById('sugarPercent');
 
+  const fermentCard = document.getElementById('fermentCard');
+  const fermentTimeDisplay = document.getElementById('fermentTimeDisplay');
+  const fermentTempDisplay = document.getElementById('fermentTempDisplay');
+  const fermentTypeDisplay = document.getElementById('fermentTypeDisplay');
+
   // Yeast Helper
   const yeastHelperCard = document.getElementById('yeastHelperCard');
   const helperIdy = document.getElementById('helperIdy');
@@ -448,22 +453,29 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Auto Yeast calculation logic
     let Y = 0;
+    let time = 24;
+    let tempVal = parseFloat(fermentTempNum.value) || 20;
+    let tempC = tempVal;
+    if (tempUnit === 'F') {
+      tempC = (tempVal - 32) * 5 / 9;
+    }
+
     if (isAutoYeast) {
-      const time = parseFloat(fermentTimeNum.value) || 24;
-      let temp = parseFloat(fermentTempNum.value) || 20;
-      
-      // Convert Fahrenheit to Celsius for formula if unit is F
-      if (tempUnit === 'F') {
-        temp = (temp - 32) * 5 / 9;
-      }
-      
-      Y = calculateYeastPercentage(time, temp, yeastType);
+      time = parseFloat(fermentTimeNum.value) || 24;
+      Y = calculateYeastPercentage(time, tempC, yeastType);
       
       // Update Yeast inputs with calculated value
       yeastRange.value = Y.toFixed(2);
       yeastNum.value = Y.toFixed(2);
     } else {
       Y = parseFloat(yeastNum.value) || 0;
+      // Calculate time from yeast
+      time = calculateFermentationTime(Y, tempC, yeastType);
+      
+      // Update fermentation time inputs to match
+      const formattedTime = time < 10 ? time.toFixed(1) : Math.round(time).toString();
+      fermentTimeNum.value = formattedTime;
+      fermentTimeRange.value = Math.round(time);
     }
 
     const totalDoughWeight = N * B;
@@ -560,6 +572,19 @@ document.addEventListener('DOMContentLoaded', () => {
       sugarCard.classList.add('hidden');
     }
 
+    // Update Fermentation Card
+    if (fermentTimeDisplay && fermentTempDisplay && fermentTypeDisplay) {
+      const formattedTime = time < 10 ? time.toFixed(1) : Math.round(time);
+      fermentTimeDisplay.textContent = formattedTime + 'h';
+      fermentTempDisplay.innerHTML = `Ambient Temp: <strong>${tempVal.toFixed(tempUnit === 'C' ? 1 : 0)}°${tempUnit}</strong>`;
+      
+      if (tempC <= 10) {
+        fermentTypeDisplay.textContent = 'Cold Ferment';
+      } else {
+        fermentTypeDisplay.textContent = 'Room Temp';
+      }
+    }
+
     // Update Yeast Equivalents Card
     if (yeastType !== 'sourdough') {
       let idyEquivalent = 0;
@@ -604,6 +629,24 @@ document.addEventListener('DOMContentLoaded', () => {
       if (type === 'fresh') val = idyVal * 3.0;
       // clamp dry/fresh yeast between 0.01% and 3.0%
       return Math.min(Math.max(val, 0.01), 3.0);
+    }
+  }
+
+  function calculateFermentationTime(yeastPercent, tempC, type) {
+    const base = 2.55;
+    const rate = Math.pow(base, tempC / 10);
+    
+    if (type === 'sourdough') {
+      const val = 1250 / (yeastPercent * rate);
+      // clamp time between 2 and 72 hours
+      return Math.min(Math.max(val, 2.0), 72.0);
+    } else {
+      let k = 4.8;
+      if (type === 'ady') k = 4.8 * 1.5;
+      if (type === 'fresh') k = 4.8 * 3.0;
+      const val = k / (yeastPercent * rate);
+      // clamp time between 2 and 72 hours
+      return Math.min(Math.max(val, 2.0), 72.0);
     }
   }
 
@@ -734,32 +777,30 @@ document.addEventListener('DOMContentLoaded', () => {
     autoYeastCheck.checked = isAutoYeast;
     
     // Sync time and temperature settings if present
+    const loadedUnit = recipe.tempUnit || 'C';
+    tempUnit = loadedUnit;
+    if (loadedUnit === 'C') {
+      unitBtnC.classList.add('active');
+      unitBtnF.classList.remove('active');
+      tempUnitLabel.textContent = '°C';
+      fermentTempRange.min = '3';
+      fermentTempRange.max = '35';
+      fermentTempRange.step = '0.5';
+    } else {
+      unitBtnF.classList.add('active');
+      unitBtnC.classList.remove('active');
+      tempUnitLabel.textContent = '°F';
+      fermentTempRange.min = '37';
+      fermentTempRange.max = '95';
+      fermentTempRange.step = '1';
+    }
+    
+    fermentTimeNum.value = recipe.fermentTime || 24;
+    fermentTimeRange.value = recipe.fermentTime || 24;
+    fermentTempNum.value = recipe.fermentTemp || 20;
+    fermentTempRange.value = recipe.fermentTemp || 20;
+
     if (recipe.isAutoYeast) {
-      fermentTimeNum.value = recipe.fermentTime || 24;
-      fermentTimeRange.value = recipe.fermentTime || 24;
-      
-      // Setup unit representation first
-      const loadedUnit = recipe.tempUnit || 'C';
-      tempUnit = loadedUnit;
-      if (loadedUnit === 'C') {
-        unitBtnC.classList.add('active');
-        unitBtnF.classList.remove('active');
-        tempUnitLabel.textContent = '°C';
-        fermentTempRange.min = '3';
-        fermentTempRange.max = '35';
-        fermentTempRange.step = '0.5';
-      } else {
-        unitBtnF.classList.add('active');
-        unitBtnC.classList.remove('active');
-        tempUnitLabel.textContent = '°F';
-        fermentTempRange.min = '37';
-        fermentTempRange.max = '95';
-        fermentTempRange.step = '1';
-      }
-      
-      fermentTempNum.value = recipe.fermentTemp || 20;
-      fermentTempRange.value = recipe.fermentTemp || 20;
-      
       // Update UI classes
       tempTimeContainer.classList.remove('hidden-accordion');
       yeastRange.disabled = true;

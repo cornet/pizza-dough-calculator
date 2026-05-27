@@ -600,6 +600,7 @@ body {
 .salt-card { border-left-color: #ab47bc; }
 .oil-card { border-left-color: #66bb6a; }
 .sugar-card { border-left-color: #ec407a; }
+.fermentation-card { border-left-color: #ff7043; }
 
 .card-icon {
   width: 38px;
@@ -619,6 +620,7 @@ body {
 .salt-card .card-icon { color: #ab47bc; background: rgba(171, 71, 188, 0.1); }
 .oil-card .card-icon { color: #66bb6a; background: rgba(102, 187, 106, 0.1); }
 .sugar-card .card-icon { color: #ec407a; background: rgba(236, 64, 122, 0.1); }
+.fermentation-card .card-icon { color: #ff7043; background: rgba(255, 112, 67, 0.1); }
 
 .ingredient-details {
   display: flex;

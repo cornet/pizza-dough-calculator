@@ -404,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     sugarRange.value = preset.sugar;
     sugarNum.value = preset.sugar;
 
+    detectCustomPreset();
     calculateDough();
   }
 

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let savedRecipes = [];
   let isAutoYeast = false;
   let tempUnit = 'C'; // 'C' or 'F'
+  let currentTheme = 'system';
 
   // --- PRESETS CONFIGURATION ---
   const PRESETS = {
@@ -121,6 +122,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const saveRecipeBtn = document.getElementById('saveRecipeBtn');
   const savedRecipesList = document.getElementById('savedRecipesList');
   const installBtn = document.getElementById('installBtn');
+  const themeSelector = document.getElementById('themeSelector');
+  const themeButtons = themeSelector.querySelectorAll('.theme-btn');
 
   // --- INITIALIZATION ---
   initApp();
@@ -165,6 +168,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initial calculation
     calculateDough();
+
+    // Initialize Theme Selector
+    initThemeSelector();
 
     // PWA Service Worker Registration
     registerServiceWorker();
@@ -798,6 +804,60 @@ document.addEventListener('DOMContentLoaded', () => {
     savedRecipes = savedRecipes.filter(r => r.id !== id);
     localStorage.setItem('pizza_recipes', JSON.stringify(savedRecipes));
     renderSavedRecipes();
+  }
+
+  // --- THEME SELECTOR ENGINE ---
+  function initThemeSelector() {
+    currentTheme = localStorage.getItem('theme') || 'system';
+    applyThemeAttributes(currentTheme);
+    updateThemeSelectorUI();
+    
+    themeButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.dataset.theme;
+        setTheme(theme);
+      });
+    });
+    
+    const systemThemeQuery = window.matchMedia('(prefers-color-scheme: light)');
+    if (systemThemeQuery.addEventListener) {
+      systemThemeQuery.addEventListener('change', () => {
+        if (currentTheme === 'system') {
+          applyThemeAttributes('system');
+        }
+      });
+    } else if (systemThemeQuery.addListener) {
+      systemThemeQuery.addListener(() => {
+        if (currentTheme === 'system') {
+          applyThemeAttributes('system');
+        }
+      });
+    }
+  }
+
+  function setTheme(theme) {
+    if (currentTheme === theme) return;
+    currentTheme = theme;
+    localStorage.setItem('theme', theme);
+    updateThemeSelectorUI();
+    applyThemeAttributes(theme);
+  }
+
+  function updateThemeSelectorUI() {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+  }
+
+  function applyThemeAttributes(theme) {
+    let appliedTheme = theme;
+    if (theme === 'system') {
+      appliedTheme = window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    }
+    document.documentElement.setAttribute('data-applied-theme', appliedTheme);
+    
+    const themeColorMeta = document.getElementById('pwaThemeColor');
+    if (themeColorMeta) {
+      themeColorMeta.setAttribute('content', appliedTheme === 'light' ? '#fcf9f5' : '#140f0d');
+    }
   }
 
   // --- SERVICE WORKER CONTROL ---

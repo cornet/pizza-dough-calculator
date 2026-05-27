@@ -6,6 +6,8 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- STATE ---
   let currentPreset = 'neapolitan';
   let savedRecipes = [];
+  let isAutoYeast = false;
+  let tempUnit = 'C'; // 'C' or 'F'
 
   // --- PRESETS CONFIGURATION ---
   const PRESETS = {
@@ -67,6 +69,17 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const sugarRange = document.getElementById('sugar');
   const sugarNum = document.getElementById('sugarNum');
+  
+  // Auto Yeast Prediction Controls
+  const autoYeastCheck = document.getElementById('autoYeast');
+  const tempTimeContainer = document.getElementById('tempTimeContainer');
+  const fermentTimeRange = document.getElementById('fermentTime');
+  const fermentTimeNum = document.getElementById('fermentTimeNum');
+  const fermentTempRange = document.getElementById('fermentTemp');
+  const fermentTempNum = document.getElementById('fermentTempNum');
+  const unitBtnC = document.getElementById('unitC');
+  const unitBtnF = document.getElementById('unitF');
+  const tempUnitLabel = document.getElementById('tempUnitLabel');
 
   // Displays
   const totalWeightDisplay = document.getElementById('totalWeightDisplay');
@@ -122,8 +135,19 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSync(oilRange, oilNum, false);
     setupSync(sugarRange, sugarNum, false);
 
+    // Bind time & temp inputs
+    setupSync(fermentTimeRange, fermentTimeNum, true);
+    setupSync(fermentTempRange, fermentTempNum, false);
+
     // Event listeners
     yeastTypeSelect.addEventListener('change', handleYeastTypeChange);
+    
+    // Auto Yeast Checkbox Listener
+    autoYeastCheck.addEventListener('change', handleAutoYeastToggle);
+
+    // Temperature Unit Listeners
+    unitBtnC.addEventListener('click', () => setTempUnit('C'));
+    unitBtnF.addEventListener('click', () => setTempUnit('F'));
     
     // Preset buttons
     presetButtons.forEach(btn => {
@@ -144,6 +168,82 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // PWA Service Worker Registration
     registerServiceWorker();
+  }
+
+  // --- AUTO YEAST & UNIT CONTROLLERS ---
+  function handleAutoYeastToggle() {
+    isAutoYeast = autoYeastCheck.checked;
+    
+    // Toggle accordion container visibility
+    if (isAutoYeast) {
+      tempTimeContainer.classList.remove('hidden-accordion');
+      
+      // Disable yeast inputs visually and interactively
+      yeastRange.disabled = true;
+      yeastNum.disabled = true;
+      yeastRange.closest('.slider-wrapper').classList.add('disabled');
+      yeastNum.closest('.number-input-wrapper').classList.add('disabled');
+    } else {
+      tempTimeContainer.classList.add('hidden-accordion');
+      
+      // Enable yeast inputs
+      yeastRange.disabled = false;
+      yeastNum.disabled = false;
+      yeastRange.closest('.slider-wrapper').classList.remove('disabled');
+      yeastNum.closest('.number-input-wrapper').classList.remove('disabled');
+      
+      // Reset yeast slider limits/defaults based on type
+      handleYeastTypeChange();
+    }
+    
+    detectCustomPreset();
+    calculateDough();
+  }
+
+  function setTempUnit(unit) {
+    if (tempUnit === unit) return;
+    
+    tempUnit = unit;
+    
+    const currentVal = parseFloat(fermentTempNum.value);
+    
+    if (unit === 'C') {
+      unitBtnC.classList.add('active');
+      unitBtnF.classList.remove('active');
+      tempUnitLabel.textContent = '°C';
+      
+      // Convert current value F -> C
+      const valC = (currentVal - 32) * 5 / 9;
+      
+      // Set slider range for Celsius
+      fermentTempRange.min = '3';
+      fermentTempRange.max = '35';
+      fermentTempRange.step = '0.5';
+      
+      // Set values (clamped if necessary)
+      const clampedVal = Math.min(Math.max(valC, 3), 35);
+      fermentTempRange.value = clampedVal.toFixed(1);
+      fermentTempNum.value = clampedVal.toFixed(1);
+    } else {
+      unitBtnF.classList.add('active');
+      unitBtnC.classList.remove('active');
+      tempUnitLabel.textContent = '°F';
+      
+      // Convert current value C -> F
+      const valF = (currentVal * 9 / 5) + 32;
+      
+      // Set slider range for Fahrenheit
+      fermentTempRange.min = '37';
+      fermentTempRange.max = '95';
+      fermentTempRange.step = '1';
+      
+      // Set values (clamped if necessary)
+      const clampedVal = Math.min(Math.max(valF, 37), 95);
+      fermentTempRange.value = Math.round(clampedVal);
+      fermentTempNum.value = Math.round(clampedVal);
+    }
+    
+    calculateDough();
   }
 
   // --- SLIDER & NUMBER SYNC ---
@@ -191,6 +291,26 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- YEAST TYPE TOGGLE ACTIONS ---
   function handleYeastTypeChange() {
     const selectedType = yeastTypeSelect.value;
+    
+    // If auto yeast is active, we just recalculate dough (which determines the yeast %)
+    if (isAutoYeast) {
+      if (selectedType === 'sourdough') {
+        yeastCardName.textContent = 'Sourdough Starter';
+        yeastSublabel.textContent = 'Active starter (100% hydration)';
+        yeastHelperCard.classList.add('hidden');
+      } else {
+        const yeastNames = {
+          idy: 'Instant Dry Yeast (IDY)',
+          ady: 'Active Dry Yeast (ADY)',
+          fresh: 'Fresh Yeast (Compressed)'
+        };
+        yeastCardName.textContent = yeastNames[selectedType];
+        yeastSublabel.textContent = 'Fermentation agent';
+        yeastHelperCard.classList.remove('hidden');
+      }
+      calculateDough();
+      return;
+    }
     
     if (selectedType === 'sourdough') {
       // Adjust slider limits for Sourdough Starter (typical range: 5% - 40%)
@@ -249,6 +369,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
 
+    // Turn off auto yeast calculations for presets
+    autoYeastCheck.checked = false;
+    handleAutoYeastToggle();
+
     // Update yeast type select first to adjust slider ranges
     yeastTypeSelect.value = preset.yeastType;
     handleYeastTypeChange(); // Will set the default yeast value based on type, which we overwrite next
@@ -278,6 +402,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (const [key, preset] of Object.entries(PRESETS)) {
       if (
+        !isAutoYeast &&
         parseFloat(hydrationNum.value) === preset.hydration &&
         yeastTypeSelect.value === preset.yeastType &&
         parseFloat(yeastNum.value) === preset.yeast &&
@@ -310,11 +435,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const B = parseFloat(ballWeightNum.value) || 0;
     
     const H = parseFloat(hydrationNum.value) || 0;
-    const Y = parseFloat(yeastNum.value) || 0;
     const S = parseFloat(saltNum.value) || 0;
     const O = parseFloat(oilNum.value) || 0;
     const Su = parseFloat(sugarNum.value) || 0;
     const yeastType = yeastTypeSelect.value;
+    
+    // Auto Yeast calculation logic
+    let Y = 0;
+    if (isAutoYeast) {
+      const time = parseFloat(fermentTimeNum.value) || 24;
+      let temp = parseFloat(fermentTempNum.value) || 20;
+      
+      // Convert Fahrenheit to Celsius for formula if unit is F
+      if (tempUnit === 'F') {
+        temp = (temp - 32) * 5 / 9;
+      }
+      
+      Y = calculateYeastPercentage(time, temp, yeastType);
+      
+      // Update Yeast inputs with calculated value
+      yeastRange.value = Y.toFixed(2);
+      yeastNum.value = Y.toFixed(2);
+    } else {
+      Y = parseFloat(yeastNum.value) || 0;
+    }
 
     const totalDoughWeight = N * B;
     totalWeightDisplay.textContent = totalDoughWeight.toLocaleString(undefined, { maximumFractionDigits: 1 }) + 'g';
@@ -437,6 +581,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function calculateYeastPercentage(time, tempC, type) {
+    // standard IDY formula: Y = 4.8 / (t * 2.55^(T/10))
+    // Sourdough formula: Y = 1250 / (t * 2.55^(T/10))
+    const base = 2.55;
+    const rate = Math.pow(base, tempC / 10);
+    
+    if (type === 'sourdough') {
+      const val = 1250 / (time * rate);
+      // clamp sourdough starter between 5% and 40%
+      return Math.min(Math.max(val, 5.0), 40.0);
+    } else {
+      const idyVal = 4.8 / (time * rate);
+      let val = idyVal;
+      if (type === 'ady') val = idyVal * 1.5;
+      if (type === 'fresh') val = idyVal * 3.0;
+      // clamp dry/fresh yeast between 0.01% and 3.0%
+      return Math.min(Math.max(val, 0.01), 3.0);
+    }
+  }
+
   // --- LOCALSTORAGE RECIPES ---
   function saveCurrentRecipe() {
     const name = recipeNameInput.value.trim();
@@ -456,7 +620,12 @@ document.addEventListener('DOMContentLoaded', () => {
       yeast: parseFloat(yeastNum.value),
       salt: parseFloat(saltNum.value),
       oil: parseFloat(oilNum.value),
-      sugar: parseFloat(sugarNum.value)
+      sugar: parseFloat(sugarNum.value),
+      // Auto Yeast additions
+      isAutoYeast: isAutoYeast,
+      fermentTime: parseFloat(fermentTimeNum.value),
+      fermentTemp: parseFloat(fermentTempNum.value),
+      tempUnit: tempUnit
     };
 
     savedRecipes.unshift(recipe);
@@ -519,6 +688,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="spec-badge"><strong>${recipe.hydration}%</strong> Hydr</span>
           <span class="spec-badge"><strong>${recipe.yeast}%</strong> ${yeastNames[recipe.yeastType]}</span>
           <span class="spec-badge"><strong>${recipe.salt}%</strong> Salt</span>
+          ${recipe.isAutoYeast ? `<span class="spec-badge">⏱️ <strong>${recipe.fermentTime}h</strong> @ <strong>${recipe.fermentTemp}°${recipe.tempUnit}</strong></span>` : ''}
           ${recipe.oil > 0 ? `<span class="spec-badge"><strong>${recipe.oil}%</strong> Oil</span>` : ''}
           ${recipe.sugar > 0 ? `<span class="spec-badge"><strong>${recipe.sugar}%</strong> Sugar</span>` : ''}
         </div>
@@ -553,11 +723,60 @@ document.addEventListener('DOMContentLoaded', () => {
     hydrationRange.value = recipe.hydration;
     hydrationNum.value = recipe.hydration;
 
-    yeastTypeSelect.value = recipe.yeastType;
-    handleYeastTypeChange(); // Sets yeast range defaults
+    // Load auto yeast state
+    isAutoYeast = !!recipe.isAutoYeast;
+    autoYeastCheck.checked = isAutoYeast;
+    
+    // Sync time and temperature settings if present
+    if (recipe.isAutoYeast) {
+      fermentTimeNum.value = recipe.fermentTime || 24;
+      fermentTimeRange.value = recipe.fermentTime || 24;
+      
+      // Setup unit representation first
+      const loadedUnit = recipe.tempUnit || 'C';
+      tempUnit = loadedUnit;
+      if (loadedUnit === 'C') {
+        unitBtnC.classList.add('active');
+        unitBtnF.classList.remove('active');
+        tempUnitLabel.textContent = '°C';
+        fermentTempRange.min = '3';
+        fermentTempRange.max = '35';
+        fermentTempRange.step = '0.5';
+      } else {
+        unitBtnF.classList.add('active');
+        unitBtnC.classList.remove('active');
+        tempUnitLabel.textContent = '°F';
+        fermentTempRange.min = '37';
+        fermentTempRange.max = '95';
+        fermentTempRange.step = '1';
+      }
+      
+      fermentTempNum.value = recipe.fermentTemp || 20;
+      fermentTempRange.value = recipe.fermentTemp || 20;
+      
+      // Update UI classes
+      tempTimeContainer.classList.remove('hidden-accordion');
+      yeastRange.disabled = true;
+      yeastNum.disabled = true;
+      yeastRange.closest('.slider-wrapper').classList.add('disabled');
+      yeastNum.closest('.number-input-wrapper').classList.add('disabled');
+    } else {
+      tempTimeContainer.classList.add('hidden-accordion');
+      yeastRange.disabled = false;
+      yeastNum.disabled = false;
+      yeastRange.closest('.slider-wrapper').classList.remove('disabled');
+      yeastNum.closest('.number-input-wrapper').classList.remove('disabled');
+    }
 
-    yeastRange.value = recipe.yeast;
-    yeastNum.value = recipe.yeast;
+    yeastTypeSelect.value = recipe.yeastType;
+    // We call handleYeastTypeChange but note that since we restored state above, it should behave correctly
+    handleYeastTypeChange(); 
+
+    // Set slider/number values
+    if (!isAutoYeast) {
+      yeastRange.value = recipe.yeast;
+      yeastNum.value = recipe.yeast;
+    }
 
     saltRange.value = recipe.salt;
     saltNum.value = recipe.salt;

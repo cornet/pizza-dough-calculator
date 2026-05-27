@@ -138,6 +138,53 @@
                 </div>
               </div>
 
+              <!-- AUTOMATIC YEAST PROOF ESTIMATION TOGGLE -->
+              <div class="form-group checkbox-group">
+                <label class="switch-container">
+                  <input type="checkbox" id="autoYeast">
+                  <span class="switch-slider"></span>
+                  <span class="switch-label">Calculate yeast from time & temp</span>
+                </label>
+              </div>
+
+              <!-- TIME & TEMPERATURE SLIDERS (DYNAMIC ACCORDION) -->
+              <div id="tempTimeContainer" class="temp-time-container hidden-accordion">
+                <!-- FERMENTATION TIME -->
+                <div class="form-group">
+                  <div class="input-header">
+                    <label for="fermentTime">Fermentation Time</label>
+                    <div class="number-input-wrapper">
+                      <input type="number" id="fermentTimeNum" min="2" max="72" value="24">
+                      <span class="unit">hours</span>
+                    </div>
+                  </div>
+                  <div class="slider-wrapper">
+                    <input type="range" id="fermentTime" min="2" max="72" step="1" value="24">
+                  </div>
+                </div>
+
+                <!-- AMBIENT TEMPERATURE -->
+                <div class="form-group">
+                  <div class="input-header">
+                    <label for="fermentTemp">Ambient Temperature</label>
+                    <div class="temp-controls-wrapper">
+                      <!-- Unit Selector Pills -->
+                      <div class="temp-unit-toggle">
+                        <button type="button" class="unit-btn active" id="unitC">°C</button>
+                        <button type="button" class="unit-btn" id="unitF">°F</button>
+                      </div>
+                      <div class="number-input-wrapper">
+                        <input type="number" id="fermentTempNum" min="3" max="35" step="0.5" value="20">
+                        <span id="tempUnitLabel" class="unit">°C</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="slider-wrapper">
+                    <input type="range" id="fermentTemp" min="3" max="35" step="0.5" value="20">
+                  </div>
+                </div>
+              </div>
+
               <!-- YEAST PERCENTAGE -->
               <div class="form-group">
                 <div class="input-header">

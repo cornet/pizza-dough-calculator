@@ -13,6 +13,7 @@ This application requires zero infrastructure, has no external database dependen
 3. **Flexible Yeast Selection & Conversions**:
    - Supports **Instant Dry Yeast (IDY)**, **Active Dry Yeast (ADY)**, and **Fresh Yeast (Compressed)**.
    - Includes a real-time **Yeast Equivalents** helper displaying the converted amount for all three types.
+   - **Yeast Prediction Engine**: Can automatically calculate yeast percentage based on desired **fermentation time** (2 to 72 hours) and **ambient temperature** ($3^\circ\text{C}$ to $35^\circ\text{C}$ / $37^\circ\text{F}$ to $95^\circ\text{F}$).
 4. **Sourdough Starter Compensation**:
    - Built-in support for **Sourdough Starter (Levain)** at 100% hydration.
    - Automatically recalculates and reduces the added flour and water measurements in the mix to account for the flour/water present in the starter.
@@ -39,6 +40,22 @@ For standard yeasts (IDY, ADY, Fresh), all ingredients are calculated relative t
 
 Given a desired total weight $W$ (computed as number of balls $\times$ ball weight), the flour weight $F$ is solved as:
 $$F = \frac{W}{1 + \frac{\text{Hydration} + \text{Yeast} + \text{Salt} + \text{Oil} + \text{Sugar}}{100}}$$
+
+### Yeast Prediction Engine Formulas
+Yeast activity accelerates exponentially with temperature. The application uses curve-fitted functions derived from empirical research on fermentation speed to solve for the necessary yeast percentage ($Y$):
+
+* **Instant Dry Yeast (IDY)**:
+  $$Y_{\text{IDY}} = \frac{4.8}{t \times 2.55^{T/10}}$$
+  where $t$ is the fermentation time in hours, and $T$ is the temperature in Celsius.
+* **Active Dry Yeast (ADY)**:
+  $$Y_{\text{ADY}} = Y_{\text{IDY}} \times 1.5$$
+* **Fresh Yeast**:
+  $$Y_{\text{Fresh}} = Y_{\text{IDY}} \times 3.0$$
+* **Sourdough Starter (100% Hydration)**:
+  $$Y_{\text{Sourdough}} = \frac{1250}{t \times 2.55^{T/10}}$$
+
+Temperatures provided in Fahrenheit ($T_{\text{F}}$) are normalized to Celsius ($T_{\text{C}}$) before calculation:
+$$T_{\text{C}} = (T_{\text{F}} - 32) \times \frac{5}{9}$$
 
 ### Sourdough Compensation Model
 When Sourdough Starter is selected, it acts as both a levelling agent and an addition of flour and water (assuming $100\%$ hydration starter: $50\%$ flour, $50\%$ water).

@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#2a2421" />
+      <stop offset="100%" stop-color="#140f0d" />
+    </radialGradient>
+    
+    <!-- Crust Gradient -->
+    <linearGradient id="crustGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffd54f" />
+      <stop offset="50%" stop-color="#ffb300" />
+      <stop offset="100%" stop-color="#ff8f00" />
+    </linearGradient>
+
+    <!-- Cheese Gradient -->
+    <linearGradient id="cheeseGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fff176" />
+      <stop offset="100%" stop-color="#fbc02d" />
+    </linearGradient>
+
+    <!-- Shadow Filter -->
+    <filter id="dropShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000000" flood-opacity="0.5" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle -->
+  <circle cx="256" cy="256" r="240" fill="url(#bgGrad)" stroke="#e65100" stroke-width="4" />
+
+  <g filter="url(#dropShadow)">
+    <!-- Pizza Crust -->
+    <path d="M 115 170 Q 256 100 397 170 L 377 210 Q 256 145 135 210 Z" fill="url(#crustGrad)" />
+
+    <!-- Pizza Sauce (Red border under cheese) -->
+    <path d="M 130 195 Q 256 135 382 195 L 256 395 Z" fill="#d32f2f" />
+
+    <!-- Pizza Cheese (Golden Delicious Melt) -->
+    <path d="M 138 205 Q 256 148 374 205 L 256 380 Z" fill="url(#cheeseGrad)" />
+
+    <!-- Pepperonis -->
+    <circle cx="256" cy="225" r="22" fill="#b71c1c" />
+    <circle cx="253" cy="223" r="18" fill="#d32f2f" />
+    <circle cx="250" cy="220" r="4" fill="#ff8a80" opacity="0.6" />
+
+    <circle cx="205" cy="275" r="18" fill="#b71c1c" />
+    <circle cx="203" cy="273" r="15" fill="#d32f2f" />
+    <circle cx="201" cy="270" r="3" fill="#ff8a80" opacity="0.6" />
+
+    <circle cx="307" cy="275" r="18" fill="#b71c1c" />
+    <circle cx="305" cy="273" r="15" fill="#d32f2f" />
+    <circle cx="303" cy="270" r="3" fill="#ff8a80" opacity="0.6" />
+
+    <circle cx="256" cy="325" r="14" fill="#b71c1c" />
+    <circle cx="255" cy="324" r="11" fill="#d32f2f" />
+
+    <!-- Fresh Basil Leaves -->
+    <!-- Basil 1 (Left) -->
+    <path d="M 175 220 Q 155 215 165 200 Q 185 205 175 220 Z" fill="#2e7d32" />
+    <path d="M 172 217 Q 160 213 167 205" fill="none" stroke="#81c784" stroke-width="1" />
+
+    <!-- Basil 2 (Right) -->
+    <path d="M 335 215 Q 355 210 345 195 Q 325 200 335 215 Z" fill="#2e7d32" />
+    <path d="M 338 212 Q 348 208 341 200" fill="none" stroke="#81c784" stroke-width="1" />
+    
+    <!-- Basil 3 (Center) -->
+    <path d="M 256 280 Q 270 295 256 305 Q 242 295 256 280 Z" fill="#2e7d32" />
+  </g>
+</svg>

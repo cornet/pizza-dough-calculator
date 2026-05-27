@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pizza Dough Master Calculator</title>
+  <meta name="description" content="Calculate professional pizza dough recipes offline using baker's percentages, hydration, yeast conversions, and sourdough starter settings.">
+  
+  <!-- Theme Color for PWA -->
+  <meta name="theme-color" content="#140f0d">
+  
+  <!-- Web App Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS Stylesheet -->
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-logo">
+        <svg viewBox="0 0 512 512" class="logo-svg">
+          <!-- Pizza slice outline/mini -->
+          <path d="M 120 180 Q 256 110 392 180 L 256 380 Z" fill="#fbc02d" stroke="#e65100" stroke-width="8"/>
+          <circle cx="256" cy="240" r="14" fill="#d32f2f"/>
+          <circle cx="210" cy="280" r="12" fill="#d32f2f"/>
+          <circle cx="302" cy="280" r="12" fill="#d32f2f"/>
+        </svg>
+        <h1>Pizza Dough <span>Master</span></h1>
+      </div>
+      <button id="installBtn" class="btn btn-secondary install-btn" style="display: none;">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zm7-18L5.33 8.67h4V14h5.33V8.67h4L12 2z" fill="currentColor"/></svg>
+        Install App
+      </button>
+    </header>
+
+    <main class="app-main">
+      
+      <!-- PRESET CONTROLS -->
+      <section class="presets-section card">
+        <h2 class="section-title">
+          <svg class="icon header-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z" fill="currentColor"/></svg>
+          Style Presets
+        </h2>
+        <div class="presets-grid">
+          <button class="preset-btn active" data-preset="neapolitan">
+            <span class="preset-name">Neapolitan</span>
+            <span class="preset-desc">Crisp/chewy, wood-fired style (62% hydr)</span>
+          </button>
+          <button class="preset-btn" data-preset="newyork">
+            <span class="preset-name">New York</span>
+            <span class="preset-desc">Foldable slice, oil & sugar (65% hydr)</span>
+          </button>
+          <button class="preset-btn" data-preset="detroit">
+            <span class="preset-name">Detroit / Sicilian</span>
+            <span class="preset-desc">Thick, airy crust, high oil (70% hydr)</span>
+          </button>
+          <button class="preset-btn" data-preset="deepdish">
+            <span class="preset-name">Chicago Deep Dish</span>
+            <span class="preset-desc">Biscuit-like crust, high fat (55% hydr)</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- TWO COLUMN WORKSPACE -->
+      <div class="workspace-grid">
+        
+        <!-- COLUMN 1: CONTROLS -->
+        <section class="controls-column">
+          <div class="card controls-card">
+            <h2 class="section-title">
+              <svg class="icon header-icon" viewBox="0 0 24 24"><path d="M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h6V7h-6V5h-2v6h2V9z" fill="currentColor"/></svg>
+              Dough Formulation
+            </h2>
+            
+            <form id="calcForm" onsubmit="event.preventDefault();">
+              <!-- DOUGH BALL QUANTITY -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="ballsCount">Dough Balls</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="ballsCountNum" min="1" max="100" value="4">
+                    <span class="unit">balls</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="ballsCount" min="1" max="50" step="1" value="4">
+                </div>
+              </div>
+
+              <!-- DOUGH BALL WEIGHT -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="ballWeight">Dough Ball Weight</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="ballWeightNum" min="50" max="1000" value="250">
+                    <span class="unit">g</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="ballWeight" min="100" max="600" step="5" value="250">
+                </div>
+              </div>
+
+              <!-- HYDRATION -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="hydration">Hydration</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="hydrationNum" min="40" max="100" step="0.5" value="62">
+                    <span class="unit">%</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="hydration" min="45" max="95" step="1" value="62">
+                </div>
+              </div>
+
+              <!-- YEAST TYPE -->
+              <div class="form-group">
+                <label for="yeastType" class="select-label">Yeast Type</label>
+                <div class="select-wrapper">
+                  <select id="yeastType">
+                    <option value="idy">Instant Dry Yeast (IDY)</option>
+                    <option value="ady">Active Dry Yeast (ADY)</option>
+                    <option value="fresh">Fresh Yeast (Compressed)</option>
+                    <option value="sourdough">Sourdough Starter (100% Hydr.)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- YEAST PERCENTAGE -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label id="yeastLabel" for="yeast">Yeast</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="yeastNum" min="0" max="50" step="0.01" value="0.15">
+                    <span class="unit">%</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="yeast" min="0" max="2" step="0.01" value="0.15">
+                </div>
+              </div>
+
+              <!-- SALT -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="salt">Salt</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="saltNum" min="0" max="10" step="0.1" value="2.8">
+                    <span class="unit">%</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="salt" min="0" max="5" step="0.1" value="2.8">
+                </div>
+              </div>
+
+              <!-- OIL / FAT (OPTIONAL) -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="oil">Olive Oil / Fat</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="oilNum" min="0" max="30" step="0.1" value="0">
+                    <span class="unit">%</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="oil" min="0" max="15" step="0.1" value="0">
+                </div>
+              </div>
+
+              <!-- SUGAR (OPTIONAL) -->
+              <div class="form-group">
+                <div class="input-header">
+                  <label for="sugar">Sugar</label>
+                  <div class="number-input-wrapper">
+                    <input type="number" id="sugarNum" min="0" max="20" step="0.1" value="0">
+                    <span class="unit">%</span>
+                  </div>
+                </div>
+                <div class="slider-wrapper">
+                  <input type="range" id="sugar" min="0" max="10" step="0.1" value="0">
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- COLUMN 2: RESULTS -->
+        <section class="results-column">
+          
+          <!-- TOTAL PANEL -->
+          <div class="card total-weight-card">
+            <div class="total-info">
+              <span class="total-label">Total Dough Weight</span>
+              <h2 id="totalWeightDisplay" class="total-value">1,000g</h2>
+            </div>
+            <div class="total-details">
+              <span><strong>4</strong> balls of <strong>250g</strong></span>
+              <span class="dough-breakdown-summary" id="doughBreakdownSummary">Hydration: 62%</span>
+            </div>
+          </div>
+
+          <!-- INGREDIENTS LIST -->
+          <div class="ingredients-list">
+            
+            <!-- FLOUR -->
+            <div class="ingredient-card card flour-card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2c1.1 0 2 .9 2 2v2.5c1.4.3 2.5 1.4 2.8 2.8H19c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-.2c-.3 1.4-1.4 2.5-2.8 2.8V20c0 1.1-.9 2-2 2h-4c-1.1 0-2-.9-2-2v-2.7c-1.4-.3-2.5-1.4-2.8-2.8H5c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2h.2c.3-1.4 1.4-2.5 2.8-2.8V4c0-1.1.9-2 2-2h2zm0 2h-2v2.1c.3-.1.6-.1.9-.1h.2c.3 0 .6 0 .9.1V4zm4.8 7.3c-.4 0-.8-.3-.8-.8V8c0-.6-.4-1-1-1H9c-.6 0-1 .4-1 1v2.5c0 .5-.4.8-.8.8-.7 0-1.2.5-1.2 1.2v1c0 .7.5 1.2 1.2 1.2.4 0 .8.3.8.8V16c0 .6.4 1 1 1h6c.6 0 1-.4 1-1v-2.5c0-.5.4-.8.8-.8.7 0 1.2-.5 1.2-1.2v-1c0-.7-.5-1.2-1.2-1.2z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span class="ingredient-name">Flour</span>
+                <span id="flourSublabel" class="ingredient-sublabel">Bread Flour / Tipo 00</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="flourGrams" class="grams-value">605.3g</span>
+                <span class="percentage-value">100%</span>
+              </div>
+            </div>
+
+            <!-- WATER -->
+            <div class="ingredient-card card water-card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span class="ingredient-name">Water</span>
+                <span id="waterSublabel" class="ingredient-sublabel">Added water</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="waterGrams" class="grams-value">375.3g</span>
+                <span id="waterPercent" class="percentage-value">62%</span>
+              </div>
+            </div>
+
+            <!-- YEAST -->
+            <div class="ingredient-card card yeast-card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M19.3 16.9c.4-.7.7-1.5.7-2.4 0-2.5-2-4.5-4.5-4.5S11 12 11 14.5s2 4.5 4.5 4.5c.9 0 1.7-.3 2.4-.7l2.4 2.4 1.4-1.4-2.4-2.4zM15.5 17c-1.4 0-2.5-1.1-2.5-2.5s1.1-2.5 2.5-2.5 2.5 1.1 2.5 2.5-1.1 2.5-2.5 2.5zM6 3C3.8 3 2 4.8 2 7s1.8 4 4 4 4-1.8 4-4-1.8-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm4 8c0-2.2-1.8-4-4-4s-4 1.8-4 4 1.8 4 4 4 4-1.8 4-4zm-4 2c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span id="yeastCardName" class="ingredient-name">Instant Dry Yeast</span>
+                <span id="yeastSublabel" class="ingredient-sublabel">Fermentation agent</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="yeastGrams" class="grams-value">0.9g</span>
+                <span id="yeastPercent" class="percentage-value">0.15%</span>
+              </div>
+            </div>
+
+            <!-- SALT -->
+            <div class="ingredient-card card salt-card">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span class="ingredient-name">Fine Salt</span>
+                <span class="ingredient-sublabel">Sea salt (fine)</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="saltGrams" class="grams-value">17.0g</span>
+                <span id="saltPercent" class="percentage-value">2.8%</span>
+              </div>
+            </div>
+
+            <!-- OIL (Dynamic visibility support via JS adding hidden class) -->
+            <div id="oilCard" class="ingredient-card card oil-card hidden">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 3c-1.2 0-2.4 1-2.8 2.2L7 12h10l-2.2-6.8C14.4 4 13.2 3 12 3zm-5.7 11c-.5 0-.9.4-.9.9s.4.9.9.9h11.4c.5 0 .9-.4.9-.9s-.4-.9-.9-.9H6.3zM12 18c-2.8 0-5 2.2-5 5h10c0-2.8-2.2-5-5-5z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span class="ingredient-name">Olive Oil</span>
+                <span class="ingredient-sublabel">Extra virgin olive oil</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="oilGrams" class="grams-value">0.0g</span>
+                <span id="oilPercent" class="percentage-value">0%</span>
+              </div>
+            </div>
+
+            <!-- SUGAR (Dynamic visibility support) -->
+            <div id="sugarCard" class="ingredient-card card sugar-card hidden">
+              <div class="card-icon">
+                <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4l6.5 13H5.5L12 6zm-1 5h2v6h-2v-6zm0-3h2v2h-2V8z" fill="currentColor"/></svg>
+              </div>
+              <div class="ingredient-details">
+                <span class="ingredient-name">Sugar</span>
+                <span class="ingredient-sublabel">Granulated / Malt</span>
+              </div>
+              <div class="ingredient-values">
+                <span id="sugarGrams" class="grams-value">0.0g</span>
+                <span id="sugarPercent" class="percentage-value">0%</span>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- YEAST EQUIVALENT CONVERSION HELPER -->
+          <div class="card yeast-helper-card" id="yeastHelperCard">
+            <span class="helper-title">Yeast Equivalents:</span>
+            <div class="helper-grid">
+              <div class="helper-item" id="helperIdy"><strong>0.9g</strong> Instant (IDY)</div>
+              <div class="helper-item" id="helperAdy"><strong>1.4g</strong> Active (ADY)</div>
+              <div class="helper-item" id="helperFresh"><strong>2.7g</strong> Fresh Yeast</div>
+            </div>
+          </div>
+          
+        </section>
+
+      </div>
+
+      <!-- RECIPE MANAGER (SAVE & LOAD) -->
+      <section class="recipe-manager-section card">
+        <h2 class="section-title">
+          <svg class="icon header-icon" viewBox="0 0 24 24"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" fill="currentColor"/></svg>
+          Saved Formulations
+        </h2>
+        <div class="recipe-save-form">
+          <input type="text" id="recipeName" placeholder="Give this formulation a name..." aria-label="Recipe formulation name">
+          <button id="saveRecipeBtn" class="btn btn-primary">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/></svg>
+            Save Recipe
+          </button>
+        </div>
+        <div class="saved-recipes-container" id="savedRecipesList">
+          <!-- Dynamically populated -->
+          <div class="no-recipes-msg">No custom recipes saved yet. Formulate dough above and click "Save Recipe"!</div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>&copy; 2026 Pizza Dough Master. Designed for perfect fermentation.</p>
+    </footer>
+
+  </div>
+
+  <!-- JavaScript Loading -->
+  <script src="app.js"></script>
+</body>
+</html>

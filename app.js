@@ -10,6 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let tempUnit = 'C'; // 'C' or 'F'
   let currentTheme = 'system';
 
+  // --- SETTINGS STATE ---
+  let defaultTempUnit = localStorage.getItem('pizza_settings_temp_unit') || 'C';
+  let defaultAmbientTemp = parseFloat(localStorage.getItem('pizza_settings_default_temp'));
+  if (isNaN(defaultAmbientTemp)) {
+    defaultAmbientTemp = defaultTempUnit === 'C' ? 20 : 68;
+  }
+  let settingsTempUnit = defaultTempUnit; // Editing state for Settings page
+
   // --- PRESETS CONFIGURATION ---
   const PRESETS = {
     neapolitan: {
@@ -130,10 +138,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const themeSelector = document.getElementById('themeSelector');
   const themeButtons = themeSelector.querySelectorAll('.theme-btn');
 
+  // Settings View Elements
+  const settingsToggleBtn = document.getElementById('settingsToggleBtn');
+  const calculatorView = document.getElementById('calculatorView');
+  const settingsView = document.getElementById('settingsView');
+  const settingsUnitC = document.getElementById('settingsUnitC');
+  const settingsUnitF = document.getElementById('settingsUnitF');
+  const settingsDefaultTemp = document.getElementById('settingsDefaultTemp');
+  const settingsDefaultTempNum = document.getElementById('settingsDefaultTempNum');
+  const settingsTempUnitLabel = document.getElementById('settingsTempUnitLabel');
+  const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+  const cancelSettingsBtn = document.getElementById('cancelSettingsBtn');
+
   // --- INITIALIZATION ---
   initApp();
 
   function initApp() {
+    // Apply default settings
+    applySettingsDefaults();
+
     // Bind all slider/number inputs
     setupSync(ballsCountRange, ballsCountNum, true);
     setupSync(ballWeightRange, ballWeightNum, true);
@@ -170,6 +193,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Load recipes from storage
     loadRecipesFromStorage();
+
+    // Settings Page Listeners
+    settingsToggleBtn.addEventListener('click', toggleSettingsView);
+    cancelSettingsBtn.addEventListener('click', hideSettingsView);
+    settingsUnitC.addEventListener('click', () => setSettingsUnit('C'));
+    settingsUnitF.addEventListener('click', () => setSettingsUnit('F'));
+    saveSettingsBtn.addEventListener('click', saveSettings);
+    setupSettingsSync();
 
     // Initial calculation
     calculateDough();
@@ -255,6 +286,195 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     calculateDough();
+  }
+
+  // --- SETTINGS CONTROLLERS ---
+  function applySettingsDefaults() {
+    tempUnit = defaultTempUnit;
+    if (tempUnit === 'C') {
+      unitBtnC.classList.add('active');
+      unitBtnF.classList.remove('active');
+      tempUnitLabel.textContent = '°C';
+      
+      fermentTempRange.min = '3';
+      fermentTempRange.max = '35';
+      fermentTempRange.step = '0.5';
+    } else {
+      unitBtnF.classList.add('active');
+      unitBtnC.classList.remove('active');
+      tempUnitLabel.textContent = '°F';
+      
+      fermentTempRange.min = '37';
+      fermentTempRange.max = '95';
+      fermentTempRange.step = '1';
+    }
+    fermentTempRange.value = defaultAmbientTemp;
+    fermentTempNum.value = defaultAmbientTemp;
+  }
+
+  function toggleSettingsView() {
+    const isHidden = settingsView.classList.contains('hidden');
+    if (isHidden) {
+      // Show settings page
+      settingsView.classList.remove('hidden');
+      calculatorView.classList.add('hidden');
+      settingsToggleBtn.classList.add('active');
+      
+      // Load current defaults into editing state
+      settingsTempUnit = defaultTempUnit;
+      
+      // Sync settings unit pills
+      if (settingsTempUnit === 'C') {
+        settingsUnitC.classList.add('active');
+        settingsUnitF.classList.remove('active');
+        settingsTempUnitLabel.textContent = '°C';
+        
+        settingsDefaultTemp.min = '3';
+        settingsDefaultTemp.max = '35';
+        settingsDefaultTemp.step = '0.5';
+      } else {
+        settingsUnitF.classList.add('active');
+        settingsUnitC.classList.remove('active');
+        settingsTempUnitLabel.textContent = '°F';
+        
+        settingsDefaultTemp.min = '37';
+        settingsDefaultTemp.max = '95';
+        settingsDefaultTemp.step = '1';
+      }
+      
+      settingsDefaultTemp.value = defaultAmbientTemp;
+      settingsDefaultTempNum.value = defaultAmbientTemp;
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      hideSettingsView();
+    }
+  }
+
+  function hideSettingsView() {
+    settingsView.classList.add('hidden');
+    calculatorView.classList.remove('hidden');
+    settingsToggleBtn.classList.remove('active');
+    
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function setSettingsUnit(unit) {
+    if (settingsTempUnit === unit) return;
+    
+    settingsTempUnit = unit;
+    
+    const currentVal = parseFloat(settingsDefaultTempNum.value);
+    
+    if (unit === 'C') {
+      settingsUnitC.classList.add('active');
+      settingsUnitF.classList.remove('active');
+      settingsTempUnitLabel.textContent = '°C';
+      
+      // Convert current value F -> C
+      const valC = (currentVal - 32) * 5 / 9;
+      
+      // Set slider range for Celsius
+      settingsDefaultTemp.min = '3';
+      settingsDefaultTemp.max = '35';
+      settingsDefaultTemp.step = '0.5';
+      
+      // Set values (clamped if necessary)
+      const clampedVal = Math.min(Math.max(valC, 3), 35);
+      settingsDefaultTemp.value = clampedVal.toFixed(1);
+      settingsDefaultTempNum.value = clampedVal.toFixed(1);
+    } else {
+      settingsUnitF.classList.add('active');
+      settingsUnitC.classList.remove('active');
+      settingsTempUnitLabel.textContent = '°F';
+      
+      // Convert current value C -> F
+      const valF = (currentVal * 9 / 5) + 32;
+      
+      // Set slider range for Fahrenheit
+      settingsDefaultTemp.min = '37';
+      settingsDefaultTemp.max = '95';
+      settingsDefaultTemp.step = '1';
+      
+      // Set values (clamped if necessary)
+      const clampedVal = Math.min(Math.max(valF, 37), 95);
+      settingsDefaultTemp.value = Math.round(clampedVal);
+      settingsDefaultTempNum.value = Math.round(clampedVal);
+    }
+  }
+
+  function setupSettingsSync() {
+    // Slider -> Number
+    settingsDefaultTemp.addEventListener('input', () => {
+      settingsDefaultTempNum.value = settingsDefaultTemp.value;
+    });
+
+    // Number -> Slider
+    settingsDefaultTempNum.addEventListener('input', () => {
+      let val = parseFloat(settingsDefaultTempNum.value);
+      if (isNaN(val)) return;
+
+      const min = parseFloat(settingsDefaultTemp.min);
+      const max = parseFloat(settingsDefaultTemp.max);
+
+      // Clamp values for safety
+      if (val < min) val = min;
+      if (val > max) val = max;
+
+      settingsDefaultTemp.value = val;
+    });
+
+    settingsDefaultTempNum.addEventListener('blur', () => {
+      let val = parseFloat(settingsDefaultTempNum.value);
+      if (isNaN(val)) {
+        settingsDefaultTempNum.value = settingsDefaultTemp.value;
+      } else {
+        const min = parseFloat(settingsDefaultTemp.min);
+        const max = parseFloat(settingsDefaultTemp.max);
+        if (val < min) settingsDefaultTempNum.value = min;
+        if (val > max) settingsDefaultTempNum.value = max;
+        settingsDefaultTemp.value = settingsDefaultTempNum.value;
+      }
+    });
+  }
+
+  function saveSettings() {
+    const tempVal = parseFloat(settingsDefaultTempNum.value);
+    if (isNaN(tempVal)) {
+      alert('Please enter a valid temperature.');
+      return;
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('pizza_settings_temp_unit', settingsTempUnit);
+    localStorage.setItem('pizza_settings_default_temp', tempVal.toString());
+    
+    // Update global variables
+    defaultTempUnit = settingsTempUnit;
+    defaultAmbientTemp = tempVal;
+    
+    // Apply changes to the active calculator state immediately
+    if (tempUnit !== defaultTempUnit) {
+      setTempUnit(defaultTempUnit);
+    }
+    
+    // Force calculator temperature value to defaults
+    fermentTempRange.value = defaultAmbientTemp;
+    fermentTempNum.value = defaultAmbientTemp;
+    calculateDough();
+    
+    // Premium visual success feedback on the save settings button
+    const originalContent = saveSettingsBtn.innerHTML;
+    saveSettingsBtn.innerHTML = 'Saved!';
+    saveSettingsBtn.style.background = 'linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)';
+    
+    setTimeout(() => {
+      saveSettingsBtn.innerHTML = originalContent;
+      saveSettingsBtn.style.background = '';
+      hideSettingsView();
+    }, 800);
   }
 
   // --- SLIDER & NUMBER SYNC ---

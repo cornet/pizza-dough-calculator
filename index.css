@@ -1136,3 +1136,144 @@ input:disabled,
     gap: 8px;
   }
 }
+
+/* Settings Toggle Button in Header */
+.settings-toggle-btn {
+  padding: 8px 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--btn-secondary-bg);
+  border: var(--btn-secondary-border);
+  color: var(--btn-secondary-text);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.settings-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: rotate(30deg);
+}
+
+:root[data-applied-theme="light"] .settings-toggle-btn:hover {
+  background: rgba(62, 39, 35, 0.05);
+  border-color: rgba(62, 39, 35, 0.25);
+}
+
+.settings-toggle-btn.active {
+  background: var(--accent-gradient);
+  border-color: transparent;
+  color: var(--text-white);
+  transform: rotate(90deg);
+}
+
+/* Settings Page Layout */
+.settings-section {
+  padding: 30px;
+  animation: slideIn 0.35s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .settings-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+:root[data-applied-theme="light"] .settings-group {
+  background: rgba(62, 39, 35, 0.02);
+  border: 1px solid rgba(62, 39, 35, 0.08);
+}
+
+.settings-group:hover {
+  border-color: rgba(255, 145, 0, 0.15);
+}
+
+.settings-label {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.settings-desc {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.settings-unit-toggle {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  width: 100%;
+  max-width: 160px;
+}
+
+.settings-unit-toggle .unit-btn {
+  flex: 1;
+  padding: 10px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  background: var(--btn-secondary-bg);
+  border: var(--btn-secondary-border);
+  color: var(--btn-secondary-text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-unit-toggle .unit-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:root[data-applied-theme="light"] .settings-unit-toggle .unit-btn:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.settings-unit-toggle .unit-btn.active {
+  background: var(--accent-color);
+  color: var(--text-white);
+  border-color: transparent;
+  box-shadow: 0 2px 8px rgba(255, 145, 0, 0.2);
+}
+
+.settings-actions {
+  display: flex;
+  gap: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 24px;
+}
+
+:root[data-applied-theme="light"] .settings-actions {
+  border-top: 1px solid rgba(62, 39, 35, 0.08);
+}
+
+@media (max-width: 480px) {
+  .settings-actions {
+    flex-direction: column;
+  }
+  .settings-actions button {
+    width: 100%;
+  }
+}

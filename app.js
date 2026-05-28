@@ -2,6 +2,61 @@
    Pizza Dough Master - Calculator Logic & PWA Controller
    ========================================================================== */
 
+// Fermentation Table Data
+const YEAST_TABLE = {
+  ady: [0.004, 0.008, 0.013, 0.021, 0.032, 0.042, 0.053, 0.063, 0.074, 0.084, 0.126, 0.168, 0.21, 0.252, 0.294, 0.336, 0.42, 0.504, 0.588, 0.672, 0.756, 0.84, 0.924, 1.008, 1.092, 1.176, 1.26],
+  idy: [0.003, 0.006, 0.01, 0.016, 0.024, 0.032, 0.04, 0.048, 0.056, 0.064, 0.096, 0.128, 0.16, 0.192, 0.224, 0.256, 0.32, 0.384, 0.448, 0.512, 0.576, 0.64, 0.704, 0.768, 0.832, 0.896, 0.96],
+  cy: [0.01, 0.02, 0.03, 0.05, 0.075, 0.1, 0.125, 0.15, 0.175, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, 2.2, 2.4, 2.6, 2.8, 3],
+  grid: [
+    { f: 35, c: 1.7, times: [null,null,null,null,null,null,null,null,null,null,167,136,115,101,90,82,70,61,54,49,45,42,39,37,35,33,31] },
+    { f: 36, c: 2.2, times: [null,null,null,null,null,null,null,null,null,null,149,121,103,90,80,73,62,54,49,44,40,37,35,33,31,29,28] },
+    { f: 37, c: 2.8, times: [null,null,null,null,null,null,null,null,null,null,133,108,92,80,72,65,55,49,43,39,36,33,31,29,28,26,25] },
+    { f: 38, c: 3.3, times: [null,null,null,null,null,null,null,null,null,161,120,97,82,72,65,59,50,44,39,35,32,30,28,26,25,24,22] },
+    { f: 39, c: 3.9, times: [null,null,null,null,null,null,null,null,159,145,108,87,74,65,58,53,45,39,35,32,29,27,25,24,22,21,20] },
+    { f: 40, c: 4.4, times: [null,null,null,null,null,null,null,161,144,130,97,79,67,59,52,48,40,35,32,29,26,24,23,21,20,19,18] },
+    { f: 41, c: 5, times: [null,null,null,null,null,null,166,145,130,118,88,71,61,53,47,43,37,32,29,26,24,22,21,19,18,17,16] },
+    { f: 42, c: 5.6, times: [null,null,null,null,null,null,151,132,118,107,80,65,55,48,43,39,33,29,26,24,22,20,19,18,17,15,15] },
+    { f: 43, c: 6.1, times: [null,null,null,null,null,161,137,120,107,97,72,59,50,44,39,35,30,26,24,21,20,18,17,16,15,14,14] },
+    { f: 44, c: 6.7, times: [null,null,null,null,null,147,125,109,98,88,66,53,45,40,36,32,27,24,21,19,18,17,15,14,14,13,12] },
+    { f: 45, c: 7.2, times: [null,null,null,null,165,134,114,100,89,81,60,49,41,36,32,29,25,22,20,18,16,15,14,13,12,12,11] },
+    { f: 46, c: 7.8, times: [null,null,null,null,151,122,104,91,81,74,55,45,38,33,30,27,23,20,18,16,15,14,13,12,11,11,10] },
+    { f: 47, c: 8.3, times: [null,null,null,null,138,112,95,83,74,67,50,41,35,30,27,25,21,18,16,15,14,13,12,11,10,10,9] },
+    { f: 48, c: 8.9, times: [null,null,null,null,126,102,87,76,68,62,46,37,32,28,25,23,19,17,15,14,12,12,11,10,10,9,8] },
+    { f: 49, c: 9.4, times: [null,null,null,156,116,94,80,70,63,57,42,34,29,26,23,21,18,15,14,12,11,11,10,9,9,8,8] },
+    { f: 50, c: 10, times: [null,null,null,143,107,86,74,64,58,52,39,32,27,23,21,19,16,14,13,11,11,10,9,9,8,8,7] },
+    { f: 51, c: 10.6, times: [null,null,null,132,98,80,68,59,53,48,36,29,25,22,19,18,15,13,12,11,10,9,8,8,7,7,7] },
+    { f: 52, c: 11.1, times: [null,null,null,122,90,73,62,55,49,44,33,27,23,20,18,16,14,12,11,10,9,8,8,7,7,6,6] },
+    { f: 53, c: 11.7, times: [null,null,163,112,84,68,58,50,45,41,30,25,21,18,16,15,13,11,10,9,8,8,7,7,6,6,6] },
+    { f: 54, c: 12.2, times: [null,null,150,104,77,63,53,47,42,38,28,23,19,17,15,14,12,10,9,8,8,7,7,6,6,6,5] },
+    { f: 55, c: 12.8, times: [null,null,139,96,71,58,49,43,39,35,26,21,18,16,14,13,11,9,8,8,7,7,6,6,5,5,5] },
+    { f: 56, c: 13.3, times: [null,null,129,89,66,54,46,40,36,32,24,20,17,15,13,12,10,9,8,7,7,6,6,5,5,5,4] },
+    { f: 57, c: 13.9, times: [null,161,120,82,61,50,42,37,33,30,22,18,15,14,12,11,9,8,7,7,6,6,5,5,5,4,4] },
+    { f: 58, c: 14.4, times: [null,149,111,77,57,46,39,34,31,28,21,17,14,13,11,10,9,8,7,6,6,5,5,5,4,4,4] },
+    { f: 59, c: 15, times: [null,139,103,71,53,43,37,32,29,26,19,16,13,12,10,9,8,7,6,6,5,5,4,4,4,4,3] },
+    { f: 60, c: 15.6, times: [null,129,96,66,49,40,34,30,27,24,18,15,12,11,10,9,7,7,6,5,5,4,4,4,4,3,3] },
+    { f: 61, c: 16.1, times: [null,120,90,62,46,37,32,28,25,22,17,14,12,10,9,8,7,6,5,5,4,4,4,3,3,3,3] },
+    { f: 62, c: 16.7, times: [null,112,83,58,43,35,30,26,23,21,16,13,11,9,8,8,6,6,5,5,4,4,4,3,3,3,3] },
+    { f: 63, c: 17.2, times: [null,105,78,54,40,32,28,24,22,20,15,12,10,9,8,7,6,5,5,4,4,4,3,3,3,3,3] },
+    { f: 64, c: 17.8, times: [162,98,73,50,37,30,26,23,20,18,14,11,9,8,7,7,6,5,4,4,4,3,3,3,3,2,2] },
+    { f: 65, c: 18.3, times: [152,92,68,47,35,28,24,21,19,17,13,10,9,8,7,6,5,5,4,4,3,3,3,3,2,2,2] },
+    { f: 66, c: 18.9, times: [142,86,64,44,33,27,23,20,18,16,12,10,8,7,6,6,5,4,4,4,3,3,3,2,2,2,2] },
+    { f: 67, c: 19.4, times: [133,80,60,41,31,25,21,19,17,15,11,9,8,7,6,5,4,4,4,3,3,3,2,2,2,2,2] },
+    { f: 68, c: 20, times: [120,73,54,37,28,22,19,17,15,14,10,8,7,6,5,5,4,4,3,3,3,2,2,2,2,2,2] },
+    { f: 69, c: 20.6, times: [109,66,49,34,25,20,17,15,14,12,9,7,6,5,5,4,4,3,3,3,2,2,2,2,2,2,1] },
+    { f: 70, c: 21.1, times: [99,60,45,31,23,19,16,14,12,11,8,7,6,5,4,4,3,3,3,2,2,2,2,2,2,1,1] },
+    { f: 71, c: 21.7, times: [90,55,41,28,21,17,14,13,11,10,8,6,5,5,4,3,3,3,2,2,2,2,2,2,1,1,1] },
+    { f: 72, c: 22.2, times: [83,50,37,26,19,15,13,12,10,9,7,6,5,4,4,3,3,2,2,2,2,2,2,1,1,1,1] },
+    { f: 73, c: 22.8, times: [76,46,34,24,18,14,12,11,9,9,7,6,5,4,4,3,3,2,2,2,2,2,1,1,1,1,1] },
+    { f: 74, c: 23.3, times: [70,42,32,22,16,13,11,10,9,8,6,5,4,4,3,3,2,2,2,2,2,1,1,1,1,1,1] },
+    { f: 75, c: 23.9, times: [65,39,29,20,15,12,10,9,8,7,5,4,4,3,3,3,2,2,2,2,1,1,1,1,1,1,1] },
+    { f: 76, c: 24.4, times: [60,36,27,19,14,11,10,8,7,7,5,4,3,3,3,2,2,2,2,1,1,1,1,1,1,1,1] },
+    { f: 77, c: 25, times: [56,34,25,17,13,10,9,8,7,6,5,4,3,3,2,2,2,2,1,1,1,1,1,1,1,1,1] },
+    { f: 78, c: 25.6, times: [52,31,23,16,12,10,8,7,6,6,4,4,3,3,2,2,2,2,1,1,1,1,1,1,1,1,1] },
+    { f: 79, c: 26.1, times: [48,29,22,15,11,9,8,7,6,5,4,3,3,2,2,2,2,1,1,1,1,1,1,1,1,1,1] },
+    { f: 80, c: 26.7, times: [45,27,20,14,10,8,7,6,5,4,4,3,3,2,2,2,2,1,1,1,1,1,1,1,1,1,1] },
+  ]
+};
+
 document.addEventListener('DOMContentLoaded', () => {
   // --- STATE ---
   let currentPreset = 'neapolitan';
@@ -833,41 +888,109 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function calculateYeastPercentage(time, tempC, type) {
-    // standard IDY formula: Y = 4.8 / (t * 2.55^(T/10))
-    // Sourdough formula: Y = 1250 / (t * 2.55^(T/10))
-    const base = 2.55;
-    const rate = Math.pow(base, tempC / 10);
+  function getFermentationPoints(tempC, type) {
+    const tempF = (tempC * 9 / 5) + 32;
+    // Clamp tempF to [35, 80]
+    const clampedTemp = Math.min(Math.max(tempF, 35), 80);
+    const f1 = Math.floor(clampedTemp);
+    const f2 = Math.ceil(clampedTemp);
     
+    const row1 = YEAST_TABLE.grid[f1 - 35];
+    const row2 = YEAST_TABLE.grid[f2 - 35];
+    
+    const tableType = type === 'fresh' ? 'cy' : type;
+    const percentages = YEAST_TABLE[tableType];
+    
+    const points = [];
+    for (let j = 0; j < 27; j++) {
+      const t1 = row1.times[j];
+      const t2 = row2.times[j];
+      
+      let t = null;
+      if (t1 !== null && t2 !== null) {
+        if (f1 === f2) {
+          t = t1;
+        } else {
+          t = t1 + (t2 - t1) * (clampedTemp - f1);
+        }
+      } else if (t1 !== null) {
+        t = t1;
+      } else if (t2 !== null) {
+        t = t2;
+      }
+      
+      if (t !== null) {
+        points.push({ pct: percentages[j], time: t });
+      }
+    }
+    return points;
+  }
+
+  function calculateYeastPercentage(time, tempC, type) {
     if (type === 'sourdough') {
+      // Sourdough formula: Y = 1250 / (t * 2.55^(T/10))
+      const base = 2.55;
+      const rate = Math.pow(base, tempC / 10);
       const val = 1250 / (time * rate);
       // clamp sourdough starter between 5% and 40%
       return Math.min(Math.max(val, 5.0), 40.0);
     } else {
-      const idyVal = 4.8 / (time * rate);
-      let val = idyVal;
-      if (type === 'ady') val = idyVal * 1.5;
-      if (type === 'fresh') val = idyVal * 3.0;
-      // clamp dry/fresh yeast between 0.01% and 3.0%
-      return Math.min(Math.max(val, 0.01), 3.0);
+      const points = getFermentationPoints(tempC, type);
+      if (points.length === 0) return 0.15; // default fallback
+      
+      // Points are sorted ascending by pct, which means descending by time
+      if (time >= points[0].time) {
+        return points[0].pct;
+      }
+      if (time <= points[points.length - 1].time) {
+        return points[points.length - 1].pct;
+      }
+      
+      for (let i = 0; i < points.length - 1; i++) {
+        const pA = points[i];
+        const pB = points[i + 1];
+        if (time <= pA.time && time >= pB.time) {
+          if (pA.time === pB.time) {
+            return pA.pct;
+          }
+          const fraction = (time - pA.time) / (pB.time - pA.time);
+          return pA.pct + fraction * (pB.pct - pA.pct);
+        }
+      }
+      return 0.15;
     }
   }
 
   function calculateFermentationTime(yeastPercent, tempC, type) {
-    const base = 2.55;
-    const rate = Math.pow(base, tempC / 10);
-    
     if (type === 'sourdough') {
+      const base = 2.55;
+      const rate = Math.pow(base, tempC / 10);
       const val = 1250 / (yeastPercent * rate);
       // clamp time between 2 and 72 hours
       return Math.min(Math.max(val, 2.0), 72.0);
     } else {
-      let k = 4.8;
-      if (type === 'ady') k = 4.8 * 1.5;
-      if (type === 'fresh') k = 4.8 * 3.0;
-      const val = k / (yeastPercent * rate);
-      // clamp time between 2 and 72 hours
-      return Math.min(Math.max(val, 2.0), 72.0);
+      const points = getFermentationPoints(tempC, type);
+      if (points.length === 0) return 24.0;
+      
+      if (yeastPercent <= points[0].pct) {
+        return points[0].time;
+      }
+      if (yeastPercent >= points[points.length - 1].pct) {
+        return points[points.length - 1].time;
+      }
+      
+      for (let i = 0; i < points.length - 1; i++) {
+        const pA = points[i];
+        const pB = points[i + 1];
+        if (yeastPercent >= pA.pct && yeastPercent <= pB.pct) {
+          if (pA.pct === pB.pct) {
+            return pA.time;
+          }
+          const fraction = (yeastPercent - pA.pct) / (pB.pct - pA.pct);
+          return pA.time + fraction * (pB.time - pA.time);
+        }
+      }
+      return 24.0;
     }
   }
 

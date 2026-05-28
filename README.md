@@ -41,21 +41,20 @@ For standard yeasts (IDY, ADY, Fresh), all ingredients are calculated relative t
 Given a desired total weight $W$ (computed as number of balls $\times$ ball weight), the flour weight $F$ is solved as:
 $$F = \frac{W}{1 + \frac{\text{Hydration} + \text{Yeast} + \text{Salt} + \text{Oil} + \text{Sugar}}{100}}$$
 
-### Yeast Prediction Engine Formulas
-Yeast activity accelerates exponentially with temperature. The application uses curve-fitted functions derived from empirical research on fermentation speed to solve for the necessary yeast percentage ($Y$):
+### Yeast Prediction Engine Models
+Yeast activity changes with temperature and time. The application uses two methods depending on the yeast agent type selected:
 
-* **Instant Dry Yeast (IDY)**:
-  $$Y_{\text{IDY}} = \frac{4.8}{t \times 2.55^{T/10}}$$
-  where $t$ is the fermentation time in hours, and $T$ is the temperature in Celsius.
-* **Active Dry Yeast (ADY)**:
-  $$Y_{\text{ADY}} = Y_{\text{IDY}} \times 1.5$$
-* **Fresh Yeast**:
-  $$Y_{\text{Fresh}} = Y_{\text{IDY}} \times 3.0$$
-* **Sourdough Starter (100% Hydration)**:
-  $$Y_{\text{Sourdough}} = \frac{1250}{t \times 2.55^{T/10}}$$
+1. **Standard Yeast Types (IDY, ADY, Fresh Yeast)**:
+   - Quantities are determined using an empirical fermentation lookup table (derived from the TXCraig room-temperature and cold-fermentation model) covering temperatures from $35^\circ\text{F}$ to $80^\circ\text{F}$ ($1.7^\circ\text{C}$ to $26.7^\circ\text{C}$) and fermentation times from $2$ to $72$ hours.
+   - The application performs real-time temperature normalization and linear interpolation across both temperature rows and yeast percentage columns to output precise, continuous values.
+   - Temperatures outside the $[35^\circ\text{F}, 80^\circ\text{F}]$ range are clamped to the boundaries.
 
-Temperatures provided in Fahrenheit ($T_{\text{F}}$) are normalized to Celsius ($T_{\text{C}}$) before calculation:
-$$T_{\text{C}} = (T_{\text{F}} - 32) \times \frac{5}{9}$$
+2. **Sourdough Starter (100% Hydration)**:
+   - Sourdough starter utilizes a curve-fitted mathematical formula to solve for starter percentage ($Y$):
+     $$Y_{\text{Sourdough}} = \frac{1250}{t \times 2.55^{T_{\text{C}}/10}}$$
+     where $t$ is the fermentation time in hours, and $T_{\text{C}}$ is the temperature in Celsius.
+   - Temperatures provided in Fahrenheit ($T_{\text{F}}$) are normalized to Celsius ($T_{\text{C}}$):
+     $$T_{\text{C}} = (T_{\text{F}} - 32) \times \frac{5}{9}$$
 
 ### Sourdough Compensation Model
 When Sourdough Starter is selected, it acts as both a levelling agent and an addition of flour and water (assuming $100\%$ hydration starter: $50\%$ flour, $50\%$ water).

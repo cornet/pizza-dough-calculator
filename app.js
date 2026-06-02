@@ -59,7 +59,6 @@ const YEAST_TABLE = {
 
 document.addEventListener('DOMContentLoaded', () => {
   // --- STATE ---
-  let currentPreset = 'neapolitan';
   let savedRecipes = [];
   let isAutoYeast = false;
   let tempUnit = 'C'; // 'C' or 'F'
@@ -72,42 +71,6 @@ document.addEventListener('DOMContentLoaded', () => {
     defaultAmbientTemp = defaultTempUnit === 'C' ? 20 : 68;
   }
   let settingsTempUnit = defaultTempUnit; // Editing state for Settings page
-
-  // --- PRESETS CONFIGURATION ---
-  const PRESETS = {
-    neapolitan: {
-      hydration: 62,
-      yeastType: 'idy',
-      yeast: 0.15,
-      salt: 2.8,
-      oil: 0,
-      sugar: 0
-    },
-    newyork: {
-      hydration: 65,
-      yeastType: 'idy',
-      yeast: 0.35,
-      salt: 2.2,
-      oil: 1.5,
-      sugar: 1.5
-    },
-    detroit: {
-      hydration: 70,
-      yeastType: 'idy',
-      yeast: 0.5,
-      salt: 2.2,
-      oil: 2.5,
-      sugar: 0
-    },
-    deepdish: {
-      hydration: 55,
-      yeastType: 'idy',
-      yeast: 0.5,
-      salt: 1.5,
-      oil: 15.0,
-      sugar: 0
-    }
-  };
 
   // --- DOM ELEMENTS ---
   // Inputs & Sliders
@@ -127,12 +90,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const saltRange = document.getElementById('salt');
   const saltNum = document.getElementById('saltNum');
-  
-  const oilRange = document.getElementById('oil');
-  const oilNum = document.getElementById('oilNum');
-  
-  const sugarRange = document.getElementById('sugar');
-  const sugarNum = document.getElementById('sugarNum');
   
   // Auto Yeast Prediction Controls
   const autoYeastCheck = document.getElementById('autoYeast');
@@ -164,14 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
   
   const saltGrams = document.getElementById('saltGrams');
   const saltPercent = document.getElementById('saltPercent');
-  
-  const oilCard = document.getElementById('oilCard');
-  const oilGrams = document.getElementById('oilGrams');
-  const oilPercent = document.getElementById('oilPercent');
-  
-  const sugarCard = document.getElementById('sugarCard');
-  const sugarGrams = document.getElementById('sugarGrams');
-  const sugarPercent = document.getElementById('sugarPercent');
 
   const fermentCard = document.getElementById('fermentCard');
   const fermentTimeDisplay = document.getElementById('fermentTimeDisplay');
@@ -184,8 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const helperAdy = document.getElementById('helperAdy');
   const helperFresh = document.getElementById('helperFresh');
 
-  // Presets & Recipe Manager
-  const presetButtons = document.querySelectorAll('.preset-btn');
+  // Recipe Manager
   const recipeNameInput = document.getElementById('recipeName');
   const saveRecipeBtn = document.getElementById('saveRecipeBtn');
   const savedRecipesList = document.getElementById('savedRecipesList');
@@ -218,8 +166,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setupSync(hydrationRange, hydrationNum, false);
     setupSync(yeastRange, yeastNum, false);
     setupSync(saltRange, saltNum, false);
-    setupSync(oilRange, oilNum, false);
-    setupSync(sugarRange, sugarNum, false);
 
     // Bind time & temp inputs
     setupSync(fermentTimeRange, fermentTimeNum, true);
@@ -235,13 +181,7 @@ document.addEventListener('DOMContentLoaded', () => {
     unitBtnC.addEventListener('click', () => setTempUnit('C'));
     unitBtnF.addEventListener('click', () => setTempUnit('F'));
     
-    // Preset buttons
-    presetButtons.forEach(btn => {
-      btn.addEventListener('click', () => {
-        const presetKey = btn.dataset.preset;
-        applyPreset(presetKey);
-      });
-    });
+
 
     // Recipes Save
     saveRecipeBtn.addEventListener('click', saveCurrentRecipe);
@@ -293,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
       handleYeastTypeChange();
     }
     
-    detectCustomPreset();
     calculateDough();
   }
 
@@ -537,7 +476,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Range -> Number
     rangeInput.addEventListener('input', () => {
       numInput.value = rangeInput.value;
-      detectCustomPreset();
       calculateDough();
     });
 
@@ -554,7 +492,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (val > max) val = max;
 
       rangeInput.value = isInteger ? Math.round(val) : val;
-      detectCustomPreset();
       calculateDough();
     });
 
@@ -635,85 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
       yeastHelperCard.classList.remove('hidden');
     }
 
-    detectCustomPreset();
     calculateDough();
-  }
-
-  // --- PRESETS IMPLEMENTATION ---
-  function applyPreset(presetKey) {
-    const preset = PRESETS[presetKey];
-    if (!preset) return;
-
-    currentPreset = presetKey;
-    
-    // Highlight preset button
-    presetButtons.forEach(btn => {
-      if (btn.dataset.preset === presetKey) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    // Turn off auto yeast calculations for presets
-    autoYeastCheck.checked = false;
-    handleAutoYeastToggle();
-
-    // Update yeast type select first to adjust slider ranges
-    yeastTypeSelect.value = preset.yeastType;
-    handleYeastTypeChange(); // Will set the default yeast value based on type, which we overwrite next
-
-    // Set Slider + Inputs values
-    hydrationRange.value = preset.hydration;
-    hydrationNum.value = preset.hydration;
-
-    yeastRange.value = preset.yeast;
-    yeastNum.value = preset.yeast;
-
-    saltRange.value = preset.salt;
-    saltNum.value = preset.salt;
-
-    oilRange.value = preset.oil;
-    oilNum.value = preset.oil;
-
-    sugarRange.value = preset.sugar;
-    sugarNum.value = preset.sugar;
-
-    detectCustomPreset();
-    calculateDough();
-  }
-
-  function detectCustomPreset() {
-    // Check if the current settings match any preset
-    let matchFound = false;
-
-    for (const [key, preset] of Object.entries(PRESETS)) {
-      if (
-        !isAutoYeast &&
-        parseFloat(hydrationNum.value) === preset.hydration &&
-        yeastTypeSelect.value === preset.yeastType &&
-        parseFloat(yeastNum.value) === preset.yeast &&
-        parseFloat(saltNum.value) === preset.salt &&
-        parseFloat(oilNum.value) === preset.oil &&
-        parseFloat(sugarNum.value) === preset.sugar
-      ) {
-        currentPreset = key;
-        presetButtons.forEach(btn => {
-          if (btn.dataset.preset === key) {
-            btn.classList.add('active');
-          } else {
-            btn.classList.remove('active');
-          }
-        });
-        matchFound = true;
-        break;
-      }
-    }
-
-    if (!matchFound) {
-      currentPreset = 'custom';
-      presetButtons.forEach(btn => btn.classList.remove('active'));
-    }
   }
 
   // --- CORE DOUGH MATH ENGINE ---
@@ -723,8 +582,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const H = parseFloat(hydrationNum.value) || 0;
     const S = parseFloat(saltNum.value) || 0;
-    const O = parseFloat(oilNum.value) || 0;
-    const Su = parseFloat(sugarNum.value) || 0;
     const yeastType = yeastTypeSelect.value;
     
     // Auto Yeast calculation logic
@@ -768,17 +625,15 @@ document.addEventListener('DOMContentLoaded', () => {
     let water = 0;
     let yeastWt = 0;
     let saltWt = 0;
-    let oilWt = 0;
-    let sugarWt = 0;
     
     let addedFlour = 0;
     let addedWater = 0;
 
     if (yeastType === 'sourdough') {
       // Sourdough Starter Math:
-      // Total Weight W = F * (1 + H/100 + S/100 + O/100 + Su/100)
+      // Total Weight W = F * (1 + H/100 + S/100)
       // Starter weight is Y% of total flour. Starter is 50% flour / 50% water.
-      const factor = 1 + (H / 100) + (S / 100) + (O / 100) + (Su / 100);
+      const factor = 1 + (H / 100) + (S / 100);
       flour = totalDoughWeight / factor;
       
       yeastWt = flour * (Y / 100); // Starter weight
@@ -789,8 +644,6 @@ document.addEventListener('DOMContentLoaded', () => {
       addedWater = (flour * (H / 100)) - starterWater;
       
       saltWt = flour * (S / 100);
-      oilWt = flour * (O / 100);
-      sugarWt = flour * (Su / 100);
       
       // Update UI elements for Sourdough mode adjustments
       flourSublabel.innerHTML = `Total Flour: <strong>${flour.toFixed(1)}g</strong> (Mix: <strong>${addedFlour.toFixed(1)}g</strong> flour + starter)`;
@@ -801,8 +654,8 @@ document.addEventListener('DOMContentLoaded', () => {
       waterGrams.textContent = addedWater.toFixed(1) + 'g';
     } else {
       // Standard Baker's Percentages Math:
-      // Total Weight W = F * (1 + H/100 + Y/100 + S/100 + O/100 + Su/100)
-      const factor = 1 + (H + Y + S + O + Su) / 100;
+      // Total Weight W = F * (1 + H/100 + Y/100 + S/100)
+      const factor = 1 + (H + Y + S) / 100;
       flour = totalDoughWeight / factor;
       
       addedFlour = flour;
@@ -810,8 +663,6 @@ document.addEventListener('DOMContentLoaded', () => {
       addedWater = water;
       yeastWt = flour * (Y / 100);
       saltWt = flour * (S / 100);
-      oilWt = flour * (O / 100);
-      sugarWt = flour * (Su / 100);
 
       // Restore standard labels
       flourSublabel.textContent = 'Bread Flour / Tipo 00';
@@ -830,23 +681,7 @@ document.addEventListener('DOMContentLoaded', () => {
     saltGrams.textContent = saltWt.toFixed(1) + 'g';
     saltPercent.textContent = S.toFixed(1) + '%';
 
-    // Oil Visibility & Values
-    if (O > 0) {
-      oilCard.classList.remove('hidden');
-      oilGrams.textContent = oilWt.toFixed(1) + 'g';
-      oilPercent.textContent = O.toFixed(1) + '%';
-    } else {
-      oilCard.classList.add('hidden');
-    }
 
-    // Sugar Visibility & Values
-    if (Su > 0) {
-      sugarCard.classList.remove('hidden');
-      sugarGrams.textContent = sugarWt.toFixed(1) + 'g';
-      sugarPercent.textContent = Su.toFixed(1) + '%';
-    } else {
-      sugarCard.classList.add('hidden');
-    }
 
     // Update Fermentation Card
     if (fermentTimeDisplay && fermentTempDisplay && fermentTypeDisplay) {
@@ -1012,8 +847,6 @@ document.addEventListener('DOMContentLoaded', () => {
       yeastType: yeastTypeSelect.value,
       yeast: parseFloat(yeastNum.value),
       salt: parseFloat(saltNum.value),
-      oil: parseFloat(oilNum.value),
-      sugar: parseFloat(sugarNum.value),
       // Auto Yeast additions
       isAutoYeast: isAutoYeast,
       fermentTime: parseFloat(fermentTimeNum.value),
@@ -1082,8 +915,6 @@ document.addEventListener('DOMContentLoaded', () => {
           <span class="spec-badge"><strong>${recipe.yeast}%</strong> ${yeastNames[recipe.yeastType]}</span>
           <span class="spec-badge"><strong>${recipe.salt}%</strong> Salt</span>
           ${recipe.isAutoYeast ? `<span class="spec-badge">⏱️ <strong>${recipe.fermentTime}h</strong> @ <strong>${recipe.fermentTemp}°${recipe.tempUnit}</strong></span>` : ''}
-          ${recipe.oil > 0 ? `<span class="spec-badge"><strong>${recipe.oil}%</strong> Oil</span>` : ''}
-          ${recipe.sugar > 0 ? `<span class="spec-badge"><strong>${recipe.sugar}%</strong> Sugar</span>` : ''}
         </div>
       `;
 
@@ -1172,13 +1003,6 @@ document.addEventListener('DOMContentLoaded', () => {
     saltRange.value = recipe.salt;
     saltNum.value = recipe.salt;
 
-    oilRange.value = recipe.oil;
-    oilNum.value = recipe.oil;
-
-    sugarRange.value = recipe.sugar;
-    sugarNum.value = recipe.sugar;
-
-    detectCustomPreset();
     calculateDough();
 
     // Scroll to the top on mobile so results are visible

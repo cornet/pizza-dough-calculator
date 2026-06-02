@@ -82,31 +82,7 @@
 
     <main class="app-main" id="calculatorView">
       
-      <!-- PRESET CONTROLS -->
-      <section class="presets-section card">
-        <h2 class="section-title">
-          <svg class="icon header-icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.75z" fill="currentColor"/></svg>
-          Style Presets
-        </h2>
-        <div class="presets-grid">
-          <button class="preset-btn active" data-preset="neapolitan">
-            <span class="preset-name">Neapolitan</span>
-            <span class="preset-desc">Crisp/chewy, wood-fired style (62% hydr)</span>
-          </button>
-          <button class="preset-btn" data-preset="newyork">
-            <span class="preset-name">New York</span>
-            <span class="preset-desc">Foldable slice, oil & sugar (65% hydr)</span>
-          </button>
-          <button class="preset-btn" data-preset="detroit">
-            <span class="preset-name">Detroit / Sicilian</span>
-            <span class="preset-desc">Thick, airy crust, high oil (70% hydr)</span>
-          </button>
-          <button class="preset-btn" data-preset="deepdish">
-            <span class="preset-name">Chicago Deep Dish</span>
-            <span class="preset-desc">Biscuit-like crust, high fat (55% hydr)</span>
-          </button>
-        </div>
-      </section>
+
 
       <!-- TWO COLUMN WORKSPACE -->
       <div class="workspace-grid">
@@ -250,33 +226,7 @@
                 </div>
               </div>
 
-              <!-- OIL / FAT (OPTIONAL) -->
-              <div class="form-group">
-                <div class="input-header">
-                  <label for="oil">Olive Oil / Fat</label>
-                  <div class="number-input-wrapper">
-                    <input type="number" id="oilNum" min="0" max="30" step="0.1" value="0">
-                    <span class="unit">%</span>
-                  </div>
-                </div>
-                <div class="slider-wrapper">
-                  <input type="range" id="oil" min="0" max="15" step="0.1" value="0">
-                </div>
-              </div>
 
-              <!-- SUGAR (OPTIONAL) -->
-              <div class="form-group">
-                <div class="input-header">
-                  <label for="sugar">Sugar</label>
-                  <div class="number-input-wrapper">
-                    <input type="number" id="sugarNum" min="0" max="20" step="0.1" value="0">
-                    <span class="unit">%</span>
-                  </div>
-                </div>
-                <div class="slider-wrapper">
-                  <input type="range" id="sugar" min="0" max="10" step="0.1" value="0">
-                </div>
-              </div>
             </form>
           </div>
         </section>
@@ -359,35 +309,7 @@
               </div>
             </div>
 
-            <!-- OIL (Dynamic visibility support via JS adding hidden class) -->
-            <div id="oilCard" class="ingredient-card card oil-card hidden">
-              <div class="card-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 3c-1.2 0-2.4 1-2.8 2.2L7 12h10l-2.2-6.8C14.4 4 13.2 3 12 3zm-5.7 11c-.5 0-.9.4-.9.9s.4.9.9.9h11.4c.5 0 .9-.4.9-.9s-.4-.9-.9-.9H6.3zM12 18c-2.8 0-5 2.2-5 5h10c0-2.8-2.2-5-5-5z" fill="currentColor"/></svg>
-              </div>
-              <div class="ingredient-details">
-                <span class="ingredient-name">Olive Oil</span>
-                <span class="ingredient-sublabel">Extra virgin olive oil</span>
-              </div>
-              <div class="ingredient-values">
-                <span id="oilGrams" class="grams-value">0.0g</span>
-                <span id="oilPercent" class="percentage-value">0%</span>
-              </div>
-            </div>
 
-            <!-- SUGAR (Dynamic visibility support) -->
-            <div id="sugarCard" class="ingredient-card card sugar-card hidden">
-              <div class="card-icon">
-                <svg viewBox="0 0 24 24"><path d="M12 2L2 22h20L12 2zm0 4l6.5 13H5.5L12 6zm-1 5h2v6h-2v-6zm0-3h2v2h-2V8z" fill="currentColor"/></svg>
-              </div>
-              <div class="ingredient-details">
-                <span class="ingredient-name">Sugar</span>
-                <span class="ingredient-sublabel">Granulated / Malt</span>
-              </div>
-              <div class="ingredient-values">
-                <span id="sugarGrams" class="grams-value">0.0g</span>
-                <span id="sugarPercent" class="percentage-value">0%</span>
-              </div>
-            </div>
 
             <!-- FERMENTATION -->
             <div id="fermentCard" class="ingredient-card card fermentation-card">

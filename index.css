@@ -441,6 +441,8 @@ body {
   border-radius: 3px;
   outline: none;
   transition: background 0.3s ease;
+  touch-action: pan-y; /* Allow vertical scroll gestures on the slider */
+  pointer-events: none; /* Ignore clicks on the track to prevent accidental jumps */
 }
 
 .slider-wrapper input[type="range"]::-webkit-slider-thumb {
@@ -452,6 +454,7 @@ body {
   cursor: pointer;
   transition: all 0.15s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  pointer-events: auto; /* Enable dragging interaction specifically on the thumb */
 }
 
 .slider-wrapper input[type="range"]::-webkit-slider-thumb:hover {
@@ -469,6 +472,7 @@ body {
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  pointer-events: auto; /* Enable dragging interaction specifically on the thumb */
 }
 
 .slider-wrapper input[type="range"]::-moz-range-thumb:hover {

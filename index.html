@@ -101,12 +101,12 @@
                 <div class="input-header">
                   <label for="ballsCount">Dough Balls</label>
                   <div class="number-input-wrapper">
-                    <input type="number" id="ballsCountNum" min="1" max="100" value="4">
+                    <input type="number" id="ballsCountNum" min="1" max="24" value="4">
                     <span class="unit">balls</span>
                   </div>
                 </div>
                 <div class="slider-wrapper">
-                  <input type="range" id="ballsCount" min="1" max="50" step="1" value="4">
+                  <input type="range" id="ballsCount" min="1" max="24" step="1" value="4">
                 </div>
               </div>
 
@@ -115,12 +115,12 @@
                 <div class="input-header">
                   <label for="ballWeight">Dough Ball Weight</label>
                   <div class="number-input-wrapper">
-                    <input type="number" id="ballWeightNum" min="50" max="1000" value="250">
+                    <input type="number" id="ballWeightNum" min="50" max="500" value="250">
                     <span class="unit">g</span>
                   </div>
                 </div>
                 <div class="slider-wrapper">
-                  <input type="range" id="ballWeight" min="100" max="600" step="5" value="250">
+                  <input type="range" id="ballWeight" min="100" max="500" step="5" value="250">
                 </div>
               </div>
 
@@ -352,12 +352,12 @@
           <input type="text" id="recipeName" placeholder="Give this formulation a name..." aria-label="Recipe formulation name">
           <button id="saveRecipeBtn" class="btn btn-primary">
             <svg class="icon" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/></svg>
-            Save Recipe
+            Save
           </button>
         </div>
         <div class="saved-recipes-container" id="savedRecipesList">
           <!-- Dynamically populated -->
-          <div class="no-recipes-msg">No custom recipes saved yet. Formulate dough above and click "Save Recipe"!</div>
+          <div class="no-recipes-msg">No custom recipes saved yet. Formulate dough above and click "Save"!</div>
         </div>
       </section>
 

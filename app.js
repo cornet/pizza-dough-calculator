@@ -887,7 +887,7 @@ document.addEventListener('DOMContentLoaded', () => {
     savedRecipesList.innerHTML = '';
     
     if (savedRecipes.length === 0) {
-      savedRecipesList.innerHTML = `<div class="no-recipes-msg">No custom recipes saved yet. Formulate dough above and click "Save Recipe"!</div>`;
+      savedRecipesList.innerHTML = `<div class="no-recipes-msg">No custom recipes saved yet. Formulate dough above and click "Save"!</div>`;
       return;
     }
 
@@ -937,12 +937,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function loadRecipe(recipe) {
-    // Set Slider + Inputs values
-    ballsCountRange.value = recipe.ballsCount;
-    ballsCountNum.value = recipe.ballsCount;
+    // Set Slider + Inputs values (clamped to the new limits)
+    const ballsMin = parseFloat(ballsCountNum.min) || 1;
+    const ballsMax = parseFloat(ballsCountNum.max) || 24;
+    const loadedBalls = Math.min(Math.max(recipe.ballsCount, ballsMin), ballsMax);
+    ballsCountRange.value = loadedBalls;
+    ballsCountNum.value = loadedBalls;
     
-    ballWeightRange.value = recipe.ballWeight;
-    ballWeightNum.value = recipe.ballWeight;
+    const weightMin = parseFloat(ballWeightNum.min) || 50;
+    const weightMax = parseFloat(ballWeightNum.max) || 500;
+    const loadedWeight = Math.min(Math.max(recipe.ballWeight, weightMin), weightMax);
+    ballWeightRange.value = loadedWeight;
+    ballWeightNum.value = loadedWeight;
 
     hydrationRange.value = recipe.hydration;
     hydrationNum.value = recipe.hydration;

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Pizza Dough Master - Calculator Logic & PWA Controller
+   Pizza Dough Calculator - Calculator Logic & PWA Controller
    ========================================================================== */
 
 // Fermentation Table Data
@@ -1119,7 +1119,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('appinstalled', () => {
-    console.log('[PWA] Pizza Dough Master was installed');
+    console.log('[PWA] Pizza Dough Calculator was installed');
     installBtn.style.display = 'none';
   });
 });

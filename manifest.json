@@ -1,5 +1,5 @@
 {
-  "name": "Pizza Dough Master Calculator",
+  "name": "Pizza Dough Calculator",
   "short_name": "Pizza Calc",
   "description": "An offline-first, professional pizza dough calculator utilizing baker's percentages.",
   "start_url": "./index.html",

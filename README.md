@@ -1,4 +1,4 @@
-# Pizza Dough Master Calculator
+# Pizza Dough Calculator
 
 A premium, offline-first Progressive Web Application (PWA) designed for professional and home bakers to calculate pizza dough formulations using baker's percentages. 
 

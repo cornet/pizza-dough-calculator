@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Pizza Dough Master CSS Design System
+   Pizza Dough Calculator CSS Design System
    ========================================================================== */
 
 /* Variables & Base Configuration */
@@ -836,6 +836,31 @@ body {
   font-size: 0.8rem;
   color: var(--text-muted);
   border-top: 1px solid var(--footer-border-color);
+}
+
+.app-footer a {
+  color: #000000;
+  text-decoration: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.65;
+}
+
+:root[data-applied-theme="dark"] .app-footer a {
+  color: #ffffff;
+}
+
+.app-footer a:hover {
+  color: var(--accent-color);
+  opacity: 1;
+  transform: translateY(-1.5px);
+}
+
+.app-footer a svg {
+  width: 24px;
+  height: 24px;
 }
 
 /* Custom Toggle Switch for Auto Yeast Calculations */
